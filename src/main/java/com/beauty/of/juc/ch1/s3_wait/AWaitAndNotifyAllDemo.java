@@ -1,6 +1,6 @@
 package com.beauty.of.juc.ch1.s3_wait;
 
-public class WaitDemo {
+public class AWaitAndNotifyAllDemo {
     public static void main(String[] args) {
         System.out.println("Hello world!");
         // wait 方法，会让一个线程放弃当前占有的锁，并阻塞
