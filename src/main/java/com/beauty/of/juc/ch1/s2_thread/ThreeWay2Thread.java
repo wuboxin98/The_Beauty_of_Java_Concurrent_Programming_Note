@@ -1,4 +1,4 @@
-package com.beauty.of.juc.ch1.s1_thread;
+package com.beauty.of.juc.ch1.s2_thread;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
