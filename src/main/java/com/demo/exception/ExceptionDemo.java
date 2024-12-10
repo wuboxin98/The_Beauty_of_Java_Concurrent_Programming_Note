@@ -1,4 +1,5 @@
-package com.demo;
+package com.demo.exception;
+
 
 public class ExceptionDemo {
 

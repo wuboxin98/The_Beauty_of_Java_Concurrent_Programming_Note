@@ -1,4 +1,4 @@
-package com.demo;
+package com.demo.date;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
