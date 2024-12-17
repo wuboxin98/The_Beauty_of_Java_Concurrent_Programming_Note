@@ -27,6 +27,15 @@ public class DateFormaterDemo {
         System.out.println("SimpleDateFormat: " + format.format(yesterday));
 
         System.out.println("DateFormatter: " + dateFormatter.print(yesterday.getTime()));
+
+
+        System.out.println("LocalDate.now():"+LocalDate.now());
+
+        org.joda.time.LocalDate date = dateFormatter.parseLocalDate("2021-01-01");
+        System.out.println(date);
+        System.out.println(date.toString());
+        System.out.println(date.toString("yyyy-MM-dd"));
+        System.out.println(date.toString("yyyyMMdd"));
     }
 
 }
