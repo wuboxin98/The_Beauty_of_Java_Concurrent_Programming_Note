@@ -1,7 +1,6 @@
-package com.demo;
+package com.demo.guava;
 
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
 import org.joda.time.LocalDate;
 
 public class RangeDemo {
