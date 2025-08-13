@@ -3,10 +3,10 @@ package com.demo.thymeleaf;
 import com.google.gson.reflect.TypeToken;
 import com.util.Jsons;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -39,16 +39,15 @@ public class ThymeleafTextExample {
         //             "[/]" +
         //         "[/]";
 
-        String template = "[# th:if='${orderLimitITriggered && !#lists.isEmpty(orderLimitItems) && deductPenaltyITriggered && !#lists.isEmpty(deductPenaltyItems)}']" +
-                "\uD83D\uDCE2 [[${shortDomain}]]重要通知：您有以下权益即将丢失！\n" +
+        String template = "[# th:if='${todayHourInfo &&  orderLimitITriggered && !#lists.isEmpty(orderLimitItems) && deductPenaltyITriggered && !#lists.isEmpty(deductPenaltyItems)}']" +
+                "\uD83D\uDCE2 [[${domain}]]重要通知：您有以下权益即将丢失！\n" +
                 "截至今日[[${#temporals.format(triggerTime, 'yyyy-MM-dd HH:mm')}]]，您有以下预警，请尽快处理，以防影响业务\n" +
                 "\n" +
-                "*****\uD83D\uDD25积分余额不足预警*****\n" +
-                "\uD83D\uDCA1 建议调整活动阈值：修改活动阈值\n" +
+                "[# th:if='${todayHourInfo}']" +
                 "**等级降级预警**\n" +
-                "❗\uFE0F 截至目前，仅新增XX分（今日保级积分XX分）\n" +
-                "⚠\uFE0F 未达到保级积分，明日将降至B等级\n" +
-                "\n" +
+                "❗\uFE0F 截至目前，仅新增[[${todayScoreWarnInfo.score}]]分（今日保级积分[[${todayScoreWarnInfo.targetScore}]]分）\n" +
+                "⚠\uFE0F 未达到保级积分，明日将降至[[${todayScoreWarnInfo.degradeLevel}]]等级\n\n" +
+                "[/]" +
                 "[# th:if='${orderLimitITriggered && !#lists.isEmpty(orderLimitItems) || deductPenaltyITriggered && !#lists.isEmpty(deductPenaltyItems)}']" +
                 "*****\uD83D\uDD25权益失效预警*****[/]\n" +
                 "[# th:if='${orderLimitITriggered && !#lists.isEmpty(orderLimitItems)}']" +
@@ -101,6 +100,10 @@ public class ThymeleafTextExample {
         context.setVariable("fullDomain", "abc.trade.qunar.com");
         context.setVariable("shortDomain", "abc");
 
+        context.setVariable("todayHourInfo", new DomainLevelWarnInfo("✅", "今日实时积分预警，若保持当前活动深度，明日可能降级A等级，丢失等级权益！"));
+        context.setVariable("todayScoreWarnInfo", new TodayScoreWarnInfo("10:00-11:00", "C", 100, "B", 1000));
+
+
         // 质检违约金
         boolean deductPenaltyITriggered = true;
         List<DeductibleQualityCheckTask> deductPenaltyItems = Arrays.asList(
@@ -124,7 +127,8 @@ public class ThymeleafTextExample {
 
         System.out.println(Jsons.DEFAULT.toJson(deductPenaltyItems));
         deductPenaltyItems = Jsons.DEFAULT.fromJson("[{\"qcNo\":\"QC001\",\"remainProcessTime\":10,\"recommendUsePoint\":100.00,\"recommendDeductPenalty\":10.00},{\"qcNo\":\"QC002\",\"remainProcessTime\":5,\"recommendUsePoint\":50.00,\"recommendDeductPenalty\":5.00},{\"qcNo\":\"QC003\",\"remainProcessTime\":2,\"recommendUsePoint\":20.00,\"recommendDeductPenalty\":2.00},{\"qcNo\":\"QC004\",\"remainProcessTime\":8,\"recommendUsePoint\":80.00,\"recommendDeductPenalty\":8.00}]",
-                new TypeToken<List<DeductibleQualityCheckTask>>(){}.getType());
+                new TypeToken<List<DeductibleQualityCheckTask>>() {
+                }.getType());
         return context;
 
     }
@@ -133,8 +137,7 @@ public class ThymeleafTextExample {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    static
-    class AgentNoticeAlertOrderLimitItemBean {
+    static class AgentNoticeAlertOrderLimitItemBean {
         private Long id;
         private String domain;          // 全域名
         private String productRowkey;   // 收单上限产品rowkey
@@ -146,12 +149,60 @@ public class ThymeleafTextExample {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    static
-    class DeductibleQualityCheckTask {
+    static class DeductibleQualityCheckTask {
         private String qcNo;
         private int remainProcessTime;
         private BigDecimal recommendUsePoint;
         private BigDecimal recommendDeductPenalty;
 
     }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    static class DomainLevelWarnInfo {
+
+        /**
+         * 表情
+         */
+        private String emoji;
+        /**
+         * 文案
+         */
+        private String text;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TodayScoreWarnInfo {
+
+        /**
+         * 小时段
+         */
+        private String hour;
+
+
+        /**
+         * 当前等级
+         */
+        private String level;
+
+        /**
+         * 当日积分数量
+         */
+        private int score;
+
+        /**
+         * 下一目标等级
+         */
+        private String degradeLevel;
+
+        /**
+         * 当日目标积分
+         */
+        private int targetScore;
+    }
+
 }
