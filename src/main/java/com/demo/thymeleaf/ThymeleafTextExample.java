@@ -2,10 +2,7 @@ package com.demo.thymeleaf;
 
 import com.google.gson.reflect.TypeToken;
 import com.util.Jsons;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -14,6 +11,7 @@ import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -100,28 +98,32 @@ public class ThymeleafTextExample {
         context.setVariable("fullDomain", "abc.trade.qunar.com");
         context.setVariable("shortDomain", "abc");
 
-        context.setVariable("todayHourInfo", new DomainLevelWarnInfo("✅", "今日实时积分预警，若保持当前活动深度，明日可能降级A等级，丢失等级权益！"));
+        context.setVariable("todayHourInfo", new DomainLevelWarnInfo(DomainWarnType.UPDATE_LEVEL, "✅", "今日实时积分预警，若保持当前活动深度，明日可能降级A等级，丢失等级权益！"));
+        context.setVariable("upgradeInfo", new DomainLevelWarnInfo(DomainWarnType.UPDATE_LEVEL, "🎉", "恭喜，只差临门一脚，今日达100积分，可升级至B等级！"));
+        context.setVariable("degradeInfo", new DomainLevelWarnInfo(DomainWarnType.UPDATE_LEVEL, "⚠️", "今日积分未达标，明日将降级为C等级，丢失部分权益！"));
         context.setVariable("todayScoreWarnInfo", new TodayScoreWarnInfo("10:00-11:00", "C", 100, "B", 1000));
 
 
         // 质检违约金
         boolean deductPenaltyITriggered = true;
-        List<DeductibleQualityCheckTask> deductPenaltyItems = Arrays.asList(
-                new DeductibleQualityCheckTask("QC001", 10, new BigDecimal("100.00"), new BigDecimal("10.00")),
-                new DeductibleQualityCheckTask("QC002", 5, new BigDecimal("50.00"), new BigDecimal("5.00")),
-                new DeductibleQualityCheckTask("QC003", 2, new BigDecimal("20.00"), new BigDecimal("2.00")),
-                new DeductibleQualityCheckTask("QC004", 8, new BigDecimal("80.00"), new BigDecimal("8.00"))
-        );
+        List<DeductibleQualityCheckTask> deductPenaltyItems = new ArrayList<>();
+        deductPenaltyItems.add(new DeductibleQualityCheckTask("QC001", 10, new BigDecimal("100.00"), new BigDecimal("10.00")));
+        deductPenaltyItems.add(new DeductibleQualityCheckTask("QC002", 5, new BigDecimal("50.00"), new BigDecimal("5.00")));
+        deductPenaltyItems.add(new DeductibleQualityCheckTask("QC003", 2, new BigDecimal("20.00"), new BigDecimal("2.00")));
+        deductPenaltyItems.add(new DeductibleQualityCheckTask("QC004", 8, new BigDecimal("80.00"), new BigDecimal("8.00")));
+
+        // deductPenaltyItems = Jsons.DEFAULT.fromJson("[{\"qcNo\":\"QC001\",\"remainProcessTime\":10,\"recommendUsePoint\":100.00,\"recommendDeductPenalty\":10.00},{\"qcNo\":\"QC002\",\"remainProcessTime\":5,\"recommendUsePoint\":50.00,\"recommendDeductPenalty\":5.00},{\"qcNo\":\"QC003\",\"remainProcessTime\":2,\"recommendUsePoint\":20.00,\"recommendDeductPenalty\":2.00},{\"qcNo\":\"QC004\",\"remainProcessTime\":8,\"recommendUsePoint\":80.00,\"recommendDeductPenalty\":8.00}]",                 new TypeToken<List<DeductibleQualityCheckTask>>(){}.getType())
+
         context.setVariable("deductPenaltyITriggered", deductPenaltyITriggered);
         context.setVariable("deductPenaltyItems", deductPenaltyItems);
         // 收单上限
         boolean orderLimitITriggered = true;
-        List<AgentNoticeAlertOrderLimitItemBean> orderLimitItems = Arrays.asList(
-                new AgentNoticeAlertOrderLimitItemBean(1L, "abc.trade.qunar.com", "R1", "MU", 100, 2),
-                new AgentNoticeAlertOrderLimitItemBean(2L, "abc.trade.qunar.com", "R2", "9C", 50, 1),
-                new AgentNoticeAlertOrderLimitItemBean(3L, "abc.trade.qunar.com", "R3", "MU", 200, 3),
-                new AgentNoticeAlertOrderLimitItemBean(4L, "abc.trade.qunar.com", "R4", "9C", 150, 2)
-        );
+        List<AgentNoticeAlertOrderLimitItemBean> orderLimitItems = new ArrayList<>();
+        orderLimitItems.add(new AgentNoticeAlertOrderLimitItemBean(1L, "abc.trade.qunar.com", "R1", "MU", 100, 2));
+        orderLimitItems.add(new AgentNoticeAlertOrderLimitItemBean(2L, "abc.trade.qunar.com", "R2", "9C", 50, 1));
+        orderLimitItems.add(new AgentNoticeAlertOrderLimitItemBean(3L, "abc.trade.qunar.com", "R3", "CA", 200, 3));
+        orderLimitItems.add(new AgentNoticeAlertOrderLimitItemBean(4L, "abc.trade.qunar.com", "R4", "HU", 150, 2));
+
         context.setVariable("orderLimitITriggered", orderLimitITriggered);
         context.setVariable("orderLimitItems", orderLimitItems);
 
@@ -161,6 +163,10 @@ public class ThymeleafTextExample {
     @NoArgsConstructor
     @AllArgsConstructor
     static class DomainLevelWarnInfo {
+        /**
+         * 等级
+         */
+        private DomainWarnType type;
 
         /**
          * 表情
@@ -204,5 +210,23 @@ public class ThymeleafTextExample {
          */
         private int targetScore;
     }
+
+    @Getter
+    public enum DomainWarnType {
+
+        UPDATE_LEVEL(1, "升级预警"),
+        DOWNLOAD_LEVEL(2, "降级预警"),
+        TODAY_HOUR_POINT(3, "当日积分预警"),
+        ;
+
+        private int type;
+        private String text;
+
+        private DomainWarnType(int type, String text) {
+            this.type = type;
+            this.text = text;
+        }
+    }
+
 
 }
