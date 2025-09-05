@@ -33,13 +33,7 @@ public class ThymeleafTextExample1 {
                 "尊敬的 [[${#strings.substring(domain, 0, 3)}]] 代理商：  \n" +
                 "\uD83D\uDCC5 您今日（[[${#temporals.format(triggerTime, 'yyyy-MM-dd')}]]）等级数据如下：\n" +
                 "   - 当日等级：[[${domainColdStartLevelVo.level}]] 等级  \n" +
-                "   - 总积分（7 日日均）：[[${domainColdStartLevelVo.rewardTicket}]]分\n" +
-                "\n" +
-                "[# th:if='${agentKaTriggered && !#lists.isEmpty(agentKaItems)}']" +
-                "\uD83C\uDFC6 您今日各航司 KA 排名如下：\n" +
-                "[# th:each='item ,iterStat: ${#lists.filter(agentKaItems,\"ranklevel != 0\")}']" +
-                "([[${iterStat.index+1}]])[[${item.carrier}]]目前[[${item.my_paiming}]]名，Ka需[[${item.ranklevel}]]名，差[[${item.ka_cha}]]分\n" +
-                "[/][/]";
+                "   - 总积分（7 日日均）：[[${domainColdStartLevelVo.rewardTicket}]]分" ;
 
         // 3. 准备数据 (Context)
         Context context = getContext();
@@ -51,7 +45,7 @@ public class ThymeleafTextExample1 {
         // String escaped = StringEscapeUtils.escapeJava(template);
         // System.out.println("转义后: " + escaped);
 
-        System.out.print("Template content:");
+        System.out.println("Template content:");
         System.out.println(template.replace("\n", "\\n").replace("\t", "\\t"));
     }
 
